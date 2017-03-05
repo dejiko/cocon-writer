@@ -1,5 +1,8 @@
 #/bin/bash
 
+# cocon-writer
+# needed tools : sdparm, wodim, sg3-utils, eject
+
 CDDRV="/dev/sr0"
 
 # Wait inserted CD-R
@@ -99,7 +102,8 @@ do
 		chk_md5=$( md5sum $IMG_ISOFILE | cut -d " " -f 1 )
 		if [ "$IMG_MD5" != "$chk_md5" ];
 		then
-			echo "$IMG_ISOFILE : MD5 incorrect."
+			echo "$IMG_ISOFILE : MD5 incorrect!"
+			read -n 1 -s -p "Press any key to continue."
 			exit 1
 		fi
 		echo "$IMG_NAME ($IMG_ISOFILE) OK."
