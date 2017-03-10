@@ -55,10 +55,11 @@ writeimg()
 
 	# Temporary eject and insert
 	sdparm --command=unlock $CDDRV
-	sg_start -e -i $CDDRV
+	sg_start -e -i $CDDRV &
 	sg_start -l -i $CDDRV
 
 	# Verify
+	echo "VERIFY CD"
 	while :
 	do
 		cd_md5all=$( md5sum $CDDRV 2> /dev/null )
@@ -115,9 +116,9 @@ done
 while :
 do
 	clear
-	echo ""
-	echo " === COCONWRITER ==="
-	echo ""
+#	echo ""
+	echo "       === COCONWRITER ==="
+#	echo ""
 
 	# Show image ids
 	find "./" -type f -iname "?.imagedef" | sort | while read -r defname
