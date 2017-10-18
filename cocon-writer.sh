@@ -4,12 +4,14 @@
 # needed tools : sdparm, wodim, sg3-utils, eject
 
 CDDRV="/dev/sr0"
+CDWRITER="cdrskin"
 
 # Wait inserted CD-R
 wait_insert()
 {
 	eject $CDDRV
-	echo "PLEASE INSERT BLANK CD."
+	read -n 1 -s -r -p "PLEASE INSERT BLANK CD, AND PRESS ANY KEY"
+	eject -t $CDDRV
 
 	# Wait inserted
 	while :
@@ -33,7 +35,7 @@ wait_insert()
 # Erase CD-RW.
 rw_erase()
 {
-	wodim -v dev=$CDDRV blank=fast
+	$CDWRITER -v dev=$CDDRV blank=fast
 	eject $CDDRV
 }
 
@@ -50,13 +52,11 @@ writeimg()
 	fi
 
 	# Write image
-	wodim -v -dao dev=$CDDRV -data $iso
+	$CDWRITER -v -dao dev=$CDDRV -data $iso
 	echo "WRITE COMPLETE (RETURN: $?)."
 
 	# Temporary eject and insert
-	sdparm --command=unlock $CDDRV
-	sg_start -e -i $CDDRV &
-	sg_start -l -i $CDDRV
+	sudo /usr/local/bin/reload-usbdev.sh $CDDRV
 
 	# Verify
 	echo "VERIFY CD"
@@ -100,13 +100,13 @@ do
 
 	if [ -n "$IMG_ISOFILE" ];
 	then
-		chk_md5=$( md5sum $IMG_ISOFILE | cut -d " " -f 1 )
-		if [ "$IMG_MD5" != "$chk_md5" ];
-		then
-			echo "$IMG_ISOFILE : MD5 incorrect!"
-			read -n 1 -s -p "Press any key to continue."
-			exit 1
-		fi
+		#chk_md5=$( md5sum $IMG_ISOFILE | cut -d " " -f 1 )
+		#if [ "$IMG_MD5" != "$chk_md5" ];
+		#then
+		#	echo "$IMG_ISOFILE : MD5 incorrect!"
+		#	read -n 1 -s -p "Press any key to continue."
+		#	exit 1
+		#fi
 		echo "$IMG_NAME ($IMG_ISOFILE) OK."
 	fi
 done
@@ -130,7 +130,9 @@ do
 	echo ""
 
 	# input id
-	read -p "INPUT IMAGE NO. : " -n1 imageid
+	unset imageid
+	unset RW_ERASE
+	read -p "INPUT IMAGE NO. : " -n 1 imageid
 
 	if [ -e "${imageid}.imagedef" ];
 	then
@@ -148,6 +150,8 @@ do
 			rw_erase
 		else
 			writeimg $IMG_ISOFILE $IMG_MD5
+			unset IMG_ISOFILE
+			unset IMG_MD5
 		fi
 	else
 		echo ""

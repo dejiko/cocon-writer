@@ -1,0 +1,16 @@
+cocon-cdwriter
+
+
+# install
+
+copy reload-usbdev.sh to /usr/local/bin
+
+	# cp reload-usbdev.sh /usr/local/bin
+	# chmod a+x /usr/local/bin/reload-usbdev.sh
+
+
+	# visudo
+
+add this to sudoers
+
+	pi      ALL=NOPASSWD: /usr/local/bin/reload-usbdev.sh
